@@ -1,4 +1,4 @@
-package site.wuao.status_layout;
+package site.wuao.sample;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
