@@ -47,6 +47,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 break;
+            case KeyEvent.KEYCODE_H:
+                mStatusLayout.showStatus(StatusLayout.STATUS_HIDE, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(MainActivity.this, "haha", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                break;
             default:
                 break;
         }

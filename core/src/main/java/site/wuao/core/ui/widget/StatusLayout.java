@@ -1,7 +1,6 @@
 package site.wuao.core.ui.widget;
 
 import android.content.Context;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,69 +58,6 @@ public class StatusLayout extends RelativeLayout {
             throw new InvalidParameterException("view can not be null.");
         }
 
-        init(context);
-
-        view.post(new TimerTask() {
-            @Override
-            public void run() {
-                if (view.getParent() instanceof ViewGroup) {
-                    ViewGroup parent = (ViewGroup) view.getParent();
-                    ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-                    int index = parent.indexOfChild(view);
-                    parent.removeView(view);
-                    FrameLayout child = new FrameLayout(context);
-                    child.setLayoutParams(layoutParams);
-                    child.addView(view);
-                    child.addView(StatusLayout.this);
-                    parent.addView(child, index);
-                }
-            }
-        });
-    }
-
-    /**
-     * 使用coverView遮盖view
-     *
-     * @param context 上下文
-     * @param view 被遮盖的view
-     * @param coverView 遮盖的view
-     * @param isReplace 是否替换被遮盖的view(保持view的相对层级关系)
-     * @return 替换后的View
-     */
-    public static void coverView(final Context context, final View view, final View coverView, final boolean isReplace) {
-
-        view.post(new TimerTask() {
-            @Override
-            public void run() {
-                if (view.getParent() instanceof ViewGroup) {
-                    ViewGroup parent = (ViewGroup) view.getParent();
-                    ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-                    if (isReplace) {
-                        int index = parent.indexOfChild(view);
-                        parent.removeView(view);
-                        FrameLayout child = new FrameLayout(context);
-                        child.setLayoutParams(layoutParams);
-                        child.addView(view);
-                        child.addView(coverView);
-                        parent.addView(child, index);
-                    } else {
-                        coverView.setLayoutParams(layoutParams);
-                        ((ViewGroup) view.getParent()).addView(coverView);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            coverView.setElevation(1000);
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    /**
-     * 初始化
-     *
-     * @param context 上下文
-     */
-    private void init(Context context) {
         /*
          * 以下顺序必须与常量定义的顺序一致
          */
@@ -135,6 +71,27 @@ public class StatusLayout extends RelativeLayout {
         mStatusLayoutList.add(inflater.inflate(R.layout.status_layout, this, false));
         // 默认隐藏
         setVisibility(View.GONE);
+
+        view.post(new TimerTask() {
+            @Override
+            public void run() {
+                if (view.getParent() instanceof ViewGroup) {
+                    ViewGroup parent = (ViewGroup) view.getParent();
+                    // 原参数和位置
+                    ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+                    int index = parent.indexOfChild(view);
+                    // 移除
+                    parent.removeView(view);
+                    FrameLayout child = new FrameLayout(context);
+                    child.setLayoutParams(layoutParams);
+                    // 原本的在底层
+                    child.addView(view);
+                    // 上层
+                    child.addView(StatusLayout.this);
+                    parent.addView(child, index);
+                }
+            }
+        });
     }
 
     /**
@@ -155,42 +112,42 @@ public class StatusLayout extends RelativeLayout {
     public void showStatus(int status, View.OnClickListener retryClickListener) {
         if (status < 0) {
             setVisibility(View.GONE);
-        } else {
-            int index = status == STATUS_LOADING ? 0 : 1;
-            try {
-                View view = mStatusLayoutList.get(index);
-                // 清除当前view
-                if (getChildAt(0) != null) {
-                    removeViewAt(0);
-                }
-                // 添加状态view
-                addView(view);
-                // 显示
-                setVisibility(VISIBLE);
+            return;
+        }
 
-                if (status == STATUS_EMPTY) {
-                    ((ImageView) view.findViewById(R.id.iv_status_layout_icon)).setImageResource(R.drawable.ic_empty);
-                    ((TextView) view.findViewById(R.id.tv_status_layout_des)).setText("抱歉，暂无数据，请点击屏幕重试！");
-
-                } else if (status == STATUS_NETWORK_ERROR) {
-                    ((ImageView) view.findViewById(R.id.iv_status_layout_icon)).setImageResource(R.drawable.ic_network_error02);
-                    ((TextView) view.findViewById(R.id.tv_status_layout_des)).setText("抱歉，网络异常，请点击屏幕重试！");
-                }
-
-                // 设置点击监听
-                LinearLayout rootView = view.findViewById(R.id.ll_status_layout_root);
-                if (rootView != null) {
-                    if (retryClickListener != null) {
-                        rootView.setOnClickListener(retryClickListener);
-                        rootView.setVisibility(View.VISIBLE);
-                    } else {
-                        rootView.setVisibility(View.INVISIBLE);
-                    }
-                }
-
-            } catch (Exception e) {
-                // 不处理异常
+        int index = status == STATUS_LOADING ? 0 : 1;
+        try {
+            View view = mStatusLayoutList.get(index);
+            // 清除当前view
+            if (getChildAt(0) != null) {
+                removeViewAt(0);
             }
+            // 添加状态view
+            addView(view);
+            // 显示
+            setVisibility(VISIBLE);
+
+            if (status == STATUS_EMPTY) {
+                ((ImageView) view.findViewById(R.id.iv_status_layout_icon)).setImageResource(R.drawable.ic_empty);
+                ((TextView) view.findViewById(R.id.tv_status_layout_des)).setText("抱歉，暂无数据，请点击屏幕重试！");
+            } else if (status == STATUS_NETWORK_ERROR) {
+                ((ImageView) view.findViewById(R.id.iv_status_layout_icon)).setImageResource(R.drawable.ic_network_error02);
+                ((TextView) view.findViewById(R.id.tv_status_layout_des)).setText("抱歉，网络异常，请点击屏幕重试！");
+            }
+
+            // 设置点击监听
+            LinearLayout rootView = view.findViewById(R.id.ll_status_layout_root);
+            if (rootView != null) {
+                if (retryClickListener != null) {
+                    rootView.setOnClickListener(retryClickListener);
+                    rootView.setVisibility(View.VISIBLE);
+                } else {
+                    rootView.setVisibility(View.INVISIBLE);
+                }
+            }
+
+        } catch (Exception e) {
+            // 不处理异常
         }
     }
 }
