@@ -13,7 +13,7 @@ import java.util.TimerTask;
 import site.wuao.core.ui.widget.status.AbstractStatus;
 
 /**
- * 状态布局
+ * state layout
  *
  * @author wuao
  * @date 2018.06.03
@@ -24,11 +24,10 @@ import site.wuao.core.ui.widget.status.AbstractStatus;
  * @note -
  */
 public class StatusLayout extends RelativeLayout {
-
     /**
-     * 构造函数
+     * Constructor
      *
-     * @param context 上下文
+     * @param context context
      */
     public StatusLayout(final Context context, final View view) {
         super(context);
@@ -40,17 +39,6 @@ public class StatusLayout extends RelativeLayout {
             throw new InvalidParameterException("view can not be null.");
         }
 
-//        LayoutInflater inflater = LayoutInflater.from(context);
-//
-//        // 正在加载(动画)
-//        View inflate = inflater.inflate(R.layout.status_loading, this, false);
-//        LottieAnimationView animation = inflate.findViewById(R.id.animation_view);
-//        animation.setSpeed(2f);
-//        mStatusLayoutList.add(inflate);
-//        // 其他状态(静态图片)
-//        mStatusLayoutList.add(inflater.inflate(R.layout.status_layout, this, false));
-
-        // 默认隐藏
         setVisibility(View.GONE);
 
         view.post(new TimerTask() {
@@ -76,14 +64,6 @@ public class StatusLayout extends RelativeLayout {
     }
 
     public void showStatus(View view) {
-//        if (status < 0) {
-//            setVisibility(View.GONE);
-//            return;
-//        }
-
-//        int index = status == STATUS_LOADING ? 0 : 1;
-//        View view = mStatusLayoutList.get(index);
-
         // 清除当前view
         if (getChildAt(0) != null) {
             removeViewAt(0);
@@ -106,5 +86,9 @@ public class StatusLayout extends RelativeLayout {
         }
         loadingStatus.onCreateView(inflate);
         showStatus(inflate);
+    }
+
+    public void showHide() {
+        setVisibility(View.GONE);
     }
 }

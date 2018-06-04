@@ -7,8 +7,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import site.wuao.core.ui.widget.StatusLayout;
-import site.wuao.core.ui.widget.status.EmptyStatus;
-import site.wuao.core.ui.widget.status.LoadingStatus;
+import site.wuao.core.ui.widget.status.DefaultEmptyStatus;
+import site.wuao.core.ui.widget.status.DefaultLoadingStatus;
 import site.wuao.sample.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -25,15 +25,18 @@ public class MainActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_A:
-                mStatusLayout.showStatus(new LoadingStatus(this));
+                mStatusLayout.showStatus(new DefaultLoadingStatus(this));
                 break;
             case KeyEvent.KEYCODE_B:
-                mStatusLayout.showStatus(new EmptyStatus(this), new View.OnClickListener() {
+                mStatusLayout.showStatus(new DefaultEmptyStatus(this), new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Toast.makeText(MainActivity.this, "haha", Toast.LENGTH_SHORT).show();
                     }
                 });
+                break;
+            case KeyEvent.KEYCODE_C:
+                mStatusLayout.showHide();
                 break;
             default:
                 break;

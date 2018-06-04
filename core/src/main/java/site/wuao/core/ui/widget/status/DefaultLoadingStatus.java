@@ -3,6 +3,8 @@ package site.wuao.core.ui.widget.status;
 import android.content.Context;
 import android.view.View;
 
+import com.airbnb.lottie.LottieAnimationView;
+
 import site.wuao.core.R;
 
 /**
@@ -16,23 +18,19 @@ import site.wuao.core.R;
  * @date -
  * @note -
  */
-public class EmptyStatus extends AbstractStatus {
-    /**
-     * 构造函数
-     *
-     * @param context 上下文
-     */
-    public EmptyStatus(Context context) {
+public class DefaultLoadingStatus extends AbstractStatus {
+    public DefaultLoadingStatus(Context context) {
         super(context);
     }
 
     @Override
     public void onCreateView(View view) {
-
+        LottieAnimationView animationView = view.findViewById(R.id.animation_view);
+        animationView.setSpeed(5f);
     }
 
     @Override
     public int getContentView() {
-        return R.layout.status_empty;
+        return R.layout.status_loading;
     }
 }
