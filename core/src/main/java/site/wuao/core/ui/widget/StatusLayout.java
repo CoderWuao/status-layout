@@ -1,16 +1,22 @@
 package site.wuao.core.ui.widget;
 
 import android.content.Context;
-import android.util.AttributeSet;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.airbnb.lottie.LottieAnimationView;
+
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimerTask;
 
 import site.wuao.core.R;
 
@@ -29,9 +35,11 @@ public class StatusLayout extends RelativeLayout {
     /** 隐藏 */
     public static final int STATUS_HIDE = -1;
     /** 暂无数据 */
-    public static final int STATUS_EMPTY = 0;
+    public static final int STATUS_EMPTY = 1;
     /** 网络错误 */
-    public static final int STATUS_NETWORK_ERROR = 1;
+    public static final int STATUS_NETWORK_ERROR = 2;
+    /** 正在加载 */
+    public static final int STATUS_LOADING = 3;
 
     /** 状态列表 */
     public List<View> mStatusLayoutList = new ArrayList<>();
@@ -41,31 +49,71 @@ public class StatusLayout extends RelativeLayout {
      *
      * @param context 上下文
      */
-    public StatusLayout(Context context) {
+    public StatusLayout(final Context context, final View view) {
         super(context);
+
+        if (context == null) {
+            throw new InvalidParameterException("context can not be null.");
+        }
+        if (view == null) {
+            throw new InvalidParameterException("view can not be null.");
+        }
+
         init(context);
+
+        view.post(new TimerTask() {
+            @Override
+            public void run() {
+                if (view.getParent() instanceof ViewGroup) {
+                    ViewGroup parent = (ViewGroup) view.getParent();
+                    ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+                    int index = parent.indexOfChild(view);
+                    parent.removeView(view);
+                    FrameLayout child = new FrameLayout(context);
+                    child.setLayoutParams(layoutParams);
+                    child.addView(view);
+                    child.addView(StatusLayout.this);
+                    parent.addView(child, index);
+                }
+            }
+        });
     }
 
     /**
-     * 构造函数
+     * 使用coverView遮盖view
      *
      * @param context 上下文
-     * @param attrs 属性
+     * @param view 被遮盖的view
+     * @param coverView 遮盖的view
+     * @param isReplace 是否替换被遮盖的view(保持view的相对层级关系)
+     * @return 替换后的View
      */
-    public StatusLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(context);
-    }
+    public static void coverView(final Context context, final View view, final View coverView, final boolean isReplace) {
 
-    /**
-     * 索引条的三参构造函数
-     *
-     * @param context 上下文
-     * @param attrs 属性
-     */
-    public StatusLayout(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init(context);
+        view.post(new TimerTask() {
+            @Override
+            public void run() {
+                if (view.getParent() instanceof ViewGroup) {
+                    ViewGroup parent = (ViewGroup) view.getParent();
+                    ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+                    if (isReplace) {
+                        int index = parent.indexOfChild(view);
+                        parent.removeView(view);
+                        FrameLayout child = new FrameLayout(context);
+                        child.setLayoutParams(layoutParams);
+                        child.addView(view);
+                        child.addView(coverView);
+                        parent.addView(child, index);
+                    } else {
+                        coverView.setLayoutParams(layoutParams);
+                        ((ViewGroup) view.getParent()).addView(coverView);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            coverView.setElevation(1000);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -78,6 +126,11 @@ public class StatusLayout extends RelativeLayout {
          * 以下顺序必须与常量定义的顺序一致
          */
         LayoutInflater inflater = LayoutInflater.from(context);
+        // 正在加载(动画)
+        View inflate = inflater.inflate(R.layout.status_loading, this, false);
+        LottieAnimationView animation = inflate.findViewById(R.id.animation_view);
+        animation.setSpeed(2f);
+        mStatusLayoutList.add(inflate);
         // 其他状态(静态图片)
         mStatusLayoutList.add(inflater.inflate(R.layout.status_layout, this, false));
         // 默认隐藏
@@ -103,7 +156,7 @@ public class StatusLayout extends RelativeLayout {
         if (status < 0) {
             setVisibility(View.GONE);
         } else {
-            int index = 0;
+            int index = status == STATUS_LOADING ? 0 : 1;
             try {
                 View view = mStatusLayoutList.get(index);
                 // 清除当前view
