@@ -1,4 +1,4 @@
-package site.wuao.core.ui.widget.status;
+package site.wuao.core.ui.widget;
 
 import android.content.Context;
 import android.view.LayoutInflater;
