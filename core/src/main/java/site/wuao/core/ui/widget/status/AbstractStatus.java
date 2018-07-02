@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.View;
 
 /**
- * 页面
+ * 抽象状态
  *
  * @author wuao
  * @date 2018.06.04
@@ -17,6 +17,8 @@ import android.view.View;
 public abstract class AbstractStatus {
     /** 上下文 */
     private Context mContext;
+    /** 根布局点击事件 */
+    private View.OnClickListener mOnRootViewClickListener;
 
     /**
      * 构造函数
@@ -28,11 +30,15 @@ public abstract class AbstractStatus {
     }
 
     /**
-     * 当创建了视图
+     * 构造函数
      *
-     * @param view 视图
+     * @param context 上下文
+     * @param onRootViewClickListener 根布局点击事件
      */
-    public abstract void onCreateView(View view);
+    public AbstractStatus(Context context, View.OnClickListener onRootViewClickListener) {
+        mContext = context;
+        mOnRootViewClickListener = onRootViewClickListener;
+    }
 
     /**
      * 获取上下文
@@ -44,9 +50,27 @@ public abstract class AbstractStatus {
     }
 
     /**
+     * 获取根布局点击事件
+     *
+     * @return 根布局点击事件
+     */
+    public View.OnClickListener getOnRootViewClickListener() {
+        return mOnRootViewClickListener;
+    }
+
+    /**
      * 获取内部布局
      *
      * @return 内容布局
      */
     public abstract int getContentView();
+
+    /**
+     * 当创建了视图
+     *
+     * @param view 视图
+     */
+    public void onCreateView(View view) {
+        // 不处理
+    }
 }
